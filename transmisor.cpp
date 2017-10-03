@@ -5,7 +5,6 @@
 #include "transmisor.h"
 
 transmisor::transmisor(int Rango) {
-    this->rango = Rango;
+    this->rangoF = Rango;
     this->frecuencia = -1;
-    this->interferencias = list<interferencia>();
 }

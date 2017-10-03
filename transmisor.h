@@ -14,8 +14,8 @@ using namespace std;
 class transmisor {
 
 private:
-    int rango, frecuencia;
-    list<interferencia> interferencias;
+    int rangoF, frecuencia;
+
 
 public:
     transmisor(int Rango);
