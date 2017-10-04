@@ -3,7 +3,6 @@
 #include <list>
 
 #include "transmisor.h"
-#include <iostream>
 #include <fstream>
 
 
@@ -13,21 +12,17 @@ int main() {
 
     //Vector de transmisores
     vector<transmisor> Vtransmisores = vector<transmisor>();
+
     //Vector de arrays de enteros d dominio de las frecuencias
     vector<vector<int> > Vdominios = vector<vector<int> >();
 
     list<list<interferencia>> Linterferencias = list<list<interferencia>>();
 
-
-    //TODO: Carga de transmisores
-
-    //TODO: Carga de dominios
     string line;
     ifstream  Fdominios("datos/ejemplo/dom.txt");
     if(Fdominios.is_open()){
-        while (Fdominios.good()){
-            getline(Fdominios,line);
-
+        while (getline(Fdominios,line)){
+            cout<<"Holi Danija, en tu pc funsiona y en el mio no :D"<<endl;
         }
         Fdominios.close();
     }
