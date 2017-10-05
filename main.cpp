@@ -2,33 +2,29 @@
 #include <vector>
 #include <list>
 
-#include "transmisor.h"
-#include <fstream>
-
+#include "utilities.h"
 
 using namespace std;
 
 int main() {
 
-    //Vector de transmisores
-    vector<transmisor> Vtransmisores = vector<transmisor>();
-
-    //Vector de arrays de enteros d dominio de las frecuencias
-    vector<vector<int> > Vdominios = vector<vector<int> >();
-
-    list<list<interferencia>> Linterferencias = list<list<interferencia>>();
-
-    string line;
-    ifstream  Fdominios("datos/ejemplo/dom.txt");
-    if(Fdominios.is_open()){
-        while (getline(Fdominios,line)){
-            cout<<"Holi Danija, en tu pc funsiona y en el mio no :D"<<endl;
-        }
-        Fdominios.close();
-    }
+    //Transmisor base
+    transmisor trans = transmisor(0);
+    //Inicializamos el vector de transmisores con 1000 posiciones
+    vector<transmisor> vTransmisores(1000, trans);
 
 
+    //Inicializamos el vector de dominios con 10 posiciones
+    vector<vector<int> > vDominios(10);
 
+
+    //Inicializamos la lista de interferencias
+    list<list<interferencia>> lInterferencias = list<list<interferencia>>();
+    lInterferencias.push_back(list<interferencia>());
+
+
+    //Cargamos los ficheros de cada prueba
+    cargarDatos(&vTransmisores, &vDominios, &lInterferencias, "ejemplo");
 
     return 0;
 }

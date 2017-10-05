@@ -9,11 +9,14 @@
 class interferencia {
 
 private :
-    int trans2, limite, coste;
+    int trans1, trans2, limite, coste;
 
 public:
-    interferencia(int Trans2, int Limite, int Coste);
-
+    interferencia(int Trans1, int Trans2, int Limite, int Coste);
+    int getTrans1() { return trans1; }
+    int getTrans2(){ return trans2; }
+    int getLimite(){ return limite; }
+    int getCoste(){ return coste; }
 };
 
 
