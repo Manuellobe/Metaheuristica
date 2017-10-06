@@ -26,5 +26,9 @@ int main() {
     //Cargamos los ficheros de cada prueba
     cargarDatos(&vTransmisores, &vDominios, &lInterferencias, "ejemplo");
 
+
+    aGreedy(&vTransmisores,&vDominios,&lInterferencias);
+
+
     return 0;
 }

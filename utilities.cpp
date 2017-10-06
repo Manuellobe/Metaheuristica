@@ -95,3 +95,16 @@ void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<lis
 }
 
 //endregion
+
+void aGreedy(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<list<interferencia>> *lInter){
+
+    for (int i = 0; i < vTrans->size(); ++i) {
+        if(vTrans->at(i).getRangoF()>0){
+           vTrans->at(i).setFrecuencia(vDom->at( vTrans->at(i).getRangoF()).at(0)); // asignacion de la primera frecuencia del dominio al transmisor, modificar para que sea aleatorio
+
+        }
+    }
+
+
+
+}

@@ -13,8 +13,9 @@
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <stdlib.h>
 
 void cargarDatos(vector<transmisor> * vTrans, vector<vector<int>> * vDom, list<list<interferencia>> * lInter, string ruta);
-
+void aGreedy(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<list<interferencia>> *lInter);
 
 #endif //METAHEURISTICA_UTILITIES_H

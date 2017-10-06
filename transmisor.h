@@ -20,6 +20,13 @@ private:
 public:
     transmisor(int Rango);
 
+    int getRangoF() const;
+
+    void setRangoF(int rangoF);
+
+    int getFrecuencia() const;
+
+    void setFrecuencia(int frecuencia);
 };
 
 
