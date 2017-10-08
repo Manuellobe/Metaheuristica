@@ -14,19 +14,19 @@ using namespace std;
 class transmisor {
 
 private:
-    int rangoF, frecuencia;
+    unsigned int rangoF, frecuencia;
 
 
 public:
-    transmisor(int Rango);
+    explicit transmisor(unsigned int Rango);
 
     int getRangoF() const;
 
-    void setRangoF(int rangoF);
+    void setRangoF(unsigned int rangoF);
 
     int getFrecuencia() const;
 
-    void setFrecuencia(int frecuencia);
+    void setFrecuencia(unsigned int frecuencia);
 };
 
 

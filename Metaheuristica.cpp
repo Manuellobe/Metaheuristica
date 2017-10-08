@@ -1,10 +1,28 @@
-//
+#include "Metaheuristica.h"//
 // Created by Manuel on 28/09/2017.
 //
 
-#include "utilities.h"
+#include "Metaheuristica.h"
 
 using namespace std;
+
+
+Metaheuristica::Metaheuristica() {
+
+    //Transmisor base
+    transmisor trans(0);
+    //Inicializamos el vector de transmisores con 1000 posiciones
+    vTransmisores = vector<transmisor>(1000, trans);
+
+    //Inicializamos el vector de dominios con 10 posiciones
+    vDominios = vector<vector<Frecuencia>>(10);
+    indices = vector<vector<Frecuencia *>>(10);
+
+    //Inicializamos la lista de interferencias
+    lInterferencias = list<list<interferencia>>();
+    lInterferencias.push_back(list<interferencia>());
+}
+
 
 //region Carga de ficheros
 
@@ -13,7 +31,7 @@ using namespace std;
 /// \param vDom : vector de dominios
 /// \param lInter : lista de interferencias
 /// \param ruta : ruta del directorio
-void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<list<interferencia>> *lInter, string ruta) {
+void Metaheuristica::cargarDatos(string ruta) {
 
     string line;
     int pos;
@@ -31,7 +49,7 @@ void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<lis
             if (tokens.size() != 0) {
                 nTrans = transmisor(atoi(tokens[1].c_str()));
                 pos = atoi(tokens[0].c_str());
-                vTrans->at(pos) = nTrans;
+                vTransmisores.at(pos) = nTrans;
             }
         }
         fTrans.close();
@@ -51,7 +69,10 @@ void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<lis
             if (tokens.size() != 0) {
                 pos = atoi(tokens[0].c_str());
                 for (int i = 1; i < tokens.size(); i++) {
-                    vDom->at(pos).push_back(atoi(tokens[i].c_str()));
+                    Frecuencia nFre(atoi(tokens[i].c_str()));
+                    vDominios.at(pos).push_back(nFre);
+                    Frecuencia *pFrecuencia = new Frecuencia(nFre);
+                    indices.at(pos).push_back(pFrecuencia);
                 }
             }
         }
@@ -65,7 +86,7 @@ void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<lis
     fTrans.open("../datos/" + ruta + "/ctr.txt");
 
     if (fTrans.is_open()) {
-        list<list<interferencia>>::iterator it = lInter->begin();
+        list<list<interferencia>>::iterator it = lInterferencias.begin();
         while (getline(fTrans, line)) {
             istringstream iss(line);
             vector<string> tokens{istream_iterator<string>{iss},
@@ -75,12 +96,11 @@ void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<lis
                     interferencia inter = interferencia(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()),
                                                         atoi(tokens[4].c_str()), atoi(tokens[5].c_str()));
                     if (it->empty()) {
-                        //lInter->push_back(list<interferencia>());
                         it->push_back(inter);
                     } else if (it->begin()->getTrans1() == inter.getTrans1()) {
                         it->push_back(inter);
                     } else {
-                        lInter->push_back(list<interferencia>());
+                        lInterferencias.push_back(list<interferencia>());
                         it++;
                         it->push_back(inter);
                     }
@@ -96,15 +116,30 @@ void cargarDatos(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<lis
 
 //endregion
 
-void aGreedy(vector<transmisor> *vTrans, vector<vector<int>> *vDom, list<list<interferencia>> *lInter){
-
-    for (int i = 0; i < vTrans->size(); ++i) {
-        if(vTrans->at(i).getRangoF()>0){
-           vTrans->at(i).setFrecuencia(vDom->at( vTrans->at(i).getRangoF()).at(0)); // asignacion de la primera frecuencia del dominio al transmisor, modificar para que sea aleatorio
-
+void Metaheuristica::aGreedy(){
+    unsigned int rFrecuencia;
+    vector<Frecuencia*>::iterator randPos;
+    for (auto &vTran : vTransmisores) {
+        if(vTran.getFrecuencia() != 0) {
+            rFrecuencia = vTran.getRangoF();
+            if (!vDominios.at(rFrecuencia).empty()) {
+                randPos = indices.at(rFrecuencia).begin() + rand() % indices.at(rFrecuencia).size();
+                vTran.setFrecuencia((*randPos)->getFrecuencia());
+                (*randPos)->setUso(true);
+                indices.at(rFrecuencia).erase(randPos);
+            }
         }
     }
 
+    unsigned int coste = 0;
 
+    for(auto &lista : lInterferencias){
+        for(auto &inter : lista){
+            if(vTransmisores.at(inter.getTrans1()).getFrecuencia() + vTransmisores.at(inter.getTrans2()).getFrecuencia() > inter.getLimite())
+                coste+=inter.getCoste();
+        }
+    }
 
 }
+
+//TODO: Usar busqueda binaria en el algoritmo Busqueda Local!
