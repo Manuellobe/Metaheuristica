@@ -4,9 +4,12 @@
 
 #include "transmisor.h"
 
-transmisor::transmisor(unsigned int Rango) {
+transmisor::transmisor(unsigned int Rango):frecuencia(pair<int, int>(-1,0)) {
     this->rangoF = Rango;
-    this->frecuencia = 0;
+}
+
+transmisor::transmisor(unsigned int Rango, unsigned int frecuencia):frecuencia(pair<int, int>(frecuencia,0)) {
+    this->rangoF = Rango;
 }
 
 int transmisor::getRangoF() const {
@@ -14,13 +17,13 @@ int transmisor::getRangoF() const {
 }
 
 void transmisor::setRangoF(unsigned int rangoF) {
-    transmisor::rangoF = rangoF;
+    this->rangoF = rangoF;
 }
 
-int transmisor::getFrecuencia() const {
+Frecuencia transmisor::getFrecuencia() const {
     return frecuencia;
 }
 
-void transmisor::setFrecuencia(unsigned int frecuencia) {
-    transmisor::frecuencia = frecuencia;
+void transmisor::setFrecuencia(Frecuencia frecuencia) {
+    this->frecuencia = frecuencia;
 }

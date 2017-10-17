@@ -5,17 +5,21 @@
 #ifndef METAHEURISTICA_FRECUENCIA_H
 #define METAHEURISTICA_FRECUENCIA_H
 
+#include <utility>
+
 
 class Frecuencia {
 private:
-    int frecuencia;
+    std::pair<int, int> frecuencia;//first: frecuencia / second: indice
     bool enUso;
 public:
-    explicit Frecuencia(int nFrec) { this->frecuencia = nFrec; this->enUso = false; }
-    explicit Frecuencia(const Frecuencia &nFrec) { this->frecuencia = nFrec.frecuencia; this->enUso = nFrec.enUso; }
+    Frecuencia() {}
+    Frecuencia(std::pair<int, int> nFrec) { this->frecuencia.first = nFrec.first;
+        this->frecuencia.second = nFrec.second;this->enUso = false; }
+    Frecuencia(const Frecuencia &nFrec): frecuencia(nFrec.frecuencia) { this->enUso = nFrec.enUso; }
     bool isUsed() { return this->enUso; }
     void setUso(bool usada) { this->enUso = usada; }
-    int getFrecuencia() { return this->frecuencia; }
+    std::pair<int, int> getFrecuencia() { return this->frecuencia; }
 };
 
 

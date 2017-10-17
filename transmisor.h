@@ -7,6 +7,7 @@
 
 
 #include "interferencia.h"
+#include "frecuencia.h"
 #include <list>
 
 using namespace std;
@@ -14,19 +15,22 @@ using namespace std;
 class transmisor {
 
 private:
-    unsigned int rangoF, frecuencia;
+    unsigned int rangoF;
+    Frecuencia frecuencia;
 
 
 public:
     explicit transmisor(unsigned int Rango);
 
+    explicit transmisor(unsigned int Rango, unsigned int frecuencia);
+
     int getRangoF() const;
 
     void setRangoF(unsigned int rangoF);
 
-    int getFrecuencia() const;
+    Frecuencia getFrecuencia() const;
 
-    void setFrecuencia(unsigned int frecuencia);
+    void setFrecuencia(Frecuencia frecuencia);
 };
 
 

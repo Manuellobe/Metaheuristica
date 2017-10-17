@@ -9,7 +9,7 @@
 #include "transmisor.h"
 #include "interferencia.h"
 #include "frecuencia.h"
-//#include "random.h"
+#include <random>
 #include <vector>
 #include <fstream>
 #include <sstream>

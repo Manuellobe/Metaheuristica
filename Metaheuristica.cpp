@@ -21,6 +21,7 @@ Metaheuristica::Metaheuristica() {
     //Inicializamos la lista de interferencias
     lInterferencias = list<list<interferencia>>();
     lInterferencias.push_back(list<interferencia>());
+
 }
 
 
@@ -47,7 +48,7 @@ void Metaheuristica::cargarDatos(string ruta) {
             vector<string> tokens{istream_iterator<string>{iss},
                                   istream_iterator<string>{}};
             if (tokens.size() != 0) {
-                nTrans = transmisor(atoi(tokens[1].c_str()));
+                nTrans = transmisor(atoi(tokens[1].c_str()), 0);
                 pos = atoi(tokens[0].c_str());
                 vTransmisores.at(pos) = nTrans;
             }
@@ -69,7 +70,7 @@ void Metaheuristica::cargarDatos(string ruta) {
             if (tokens.size() != 0) {
                 pos = atoi(tokens[0].c_str());
                 for (int i = 1; i < tokens.size(); i++) {
-                    Frecuencia nFre(atoi(tokens[i].c_str()));
+                    Frecuencia nFre(pair<int, int>(atoi(tokens[i].c_str()), vDominios.at(pos).size()));
                     vDominios.at(pos).push_back(nFre);
                     Frecuencia *pFrecuencia = new Frecuencia(nFre);
                     indices.at(pos).push_back(pFrecuencia);
@@ -120,10 +121,11 @@ void Metaheuristica::aGreedy(){
     unsigned int rFrecuencia;
     vector<Frecuencia*>::iterator randPos;
     for (auto &vTran : vTransmisores) {
-        if(vTran.getFrecuencia() != 0) {
+        if(vTran.getFrecuencia().getFrecuencia().first == 0) {
             rFrecuencia = vTran.getRangoF();
-            if (!vDominios.at(rFrecuencia).empty()) {
-                randPos = indices.at(rFrecuencia).begin() + rand() % indices.at(rFrecuencia).size();
+            if (!indices.at(rFrecuencia).empty()) {
+                srand(8331773);
+                randPos = indices.at(rFrecuencia).begin() + (rand() % indices.at(rFrecuencia).size());
                 vTran.setFrecuencia((*randPos)->getFrecuencia());
                 (*randPos)->setUso(true);
                 indices.at(rFrecuencia).erase(randPos);
@@ -135,11 +137,55 @@ void Metaheuristica::aGreedy(){
 
     for(auto &lista : lInterferencias){
         for(auto &inter : lista){
-            if(vTransmisores.at(inter.getTrans1()).getFrecuencia() + vTransmisores.at(inter.getTrans2()).getFrecuencia() > inter.getLimite())
+            if(vTransmisores.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                       vTransmisores.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
                 coste+=inter.getCoste();
         }
     }
 
+    unsigned int nCoste;
+    int direccion;
+    bool deboContinuar;
+
+    do {
+        for (auto &vTran : vTransmisores) {
+            if (vTran.getFrecuencia().getFrecuencia().first != -1) {
+                rFrecuencia = vTran.getRangoF();
+                if (!indices.at(rFrecuencia).empty()) {
+                    vector<Frecuencia>::iterator currentPos;
+                    rand() % 2 == 1 ? direccion = 1 : direccion = -1;
+                    deboContinuar = true;
+                    currentPos = vDominios.at(rFrecuencia).begin() + vTran.getFrecuencia().getFrecuencia().second +
+                                 direccion;
+                    while ((currentPos != vDominios.at(rFrecuencia).begin() - 1 ||
+                            currentPos != vDominios.at(rFrecuencia).end())
+                           && deboContinuar) {
+
+                        if (!currentPos->isUsed()) {
+                            currentPos->setUso(true);
+                            vTran.setFrecuencia(*currentPos);
+                            currentPos -= direccion;
+                            currentPos->setUso(false);
+                            deboContinuar = false;
+                        } else
+                            currentPos += direccion;
+                    }
+                }
+            }
+        }
+
+        nCoste = 0;
+
+        for (auto &lista : lInterferencias) {
+            for (auto &inter : lista) {
+                if (vTransmisores.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                    vTransmisores.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
+                    nCoste += inter.getCoste();
+            }
+        }
+    }while(nCoste>coste);
+
+    cout<<nCoste<<endl;
 }
 
 //TODO: Usar busqueda binaria en el algoritmo Busqueda Local!
