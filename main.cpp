@@ -11,10 +11,10 @@ int main() {
     Metaheuristica algoritmos = Metaheuristica();
 
     //Cargamos los ficheros de cada prueba
-    algoritmos.cargarDatos("ejemplo");
+    algoritmos.cargarDatos("graph05");
 
 
-    algoritmos.aGreedy();
+    algoritmos.busquedaLocal();
 
     return 0;
 }

@@ -9,7 +9,7 @@
 #include "transmisor.h"
 #include "interferencia.h"
 #include "frecuencia.h"
-#include <random>
+#include "random.h"
 #include <vector>
 #include <fstream>
 #include <sstream>
@@ -23,10 +23,13 @@ private:
     vector<vector<Frecuencia> > vDominios;
     vector<vector<Frecuencia*>> indices;
     list<list<interferencia> > lInterferencias;
+    unsigned int coste;
 public:
     Metaheuristica();
     void cargarDatos(string ruta);
-    void aGreedy();
+    void busquedaLocal();
+    void grasp();
+    pair<vector<transmisor>,bool> generarSVecinos(vector<transmisor> nVTrans);
 
 };
 

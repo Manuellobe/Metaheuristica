@@ -13,6 +13,7 @@ Metaheuristica::Metaheuristica() {
     transmisor trans(0);
     //Inicializamos el vector de transmisores con 1000 posiciones
     vTransmisores = vector<transmisor>(1000, trans);
+    coste = 0;
 
     //Inicializamos el vector de dominios con 10 posiciones
     vDominios = vector<vector<Frecuencia>>(10);
@@ -92,7 +93,7 @@ void Metaheuristica::cargarDatos(string ruta) {
             istringstream iss(line);
             vector<string> tokens{istream_iterator<string>{iss},
                                   istream_iterator<string>{}};
-            if (tokens.size() != 0) {
+            if (tokens.size() > 1) {
                 if (tokens[2] == "C") {
                     interferencia inter = interferencia(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()),
                                                         atoi(tokens[4].c_str()), atoi(tokens[5].c_str()));
@@ -117,15 +118,16 @@ void Metaheuristica::cargarDatos(string ruta) {
 
 //endregion
 
-void Metaheuristica::aGreedy(){
+void Metaheuristica::busquedaLocal(){
     unsigned int rFrecuencia;
+    coste=0;
     vector<Frecuencia*>::iterator randPos;
     for (auto &vTran : vTransmisores) {
         if(vTran.getFrecuencia().getFrecuencia().first == 0) {
             rFrecuencia = vTran.getRangoF();
             if (!indices.at(rFrecuencia).empty()) {
-                srand(8331773);
-                randPos = indices.at(rFrecuencia).begin() + (rand() % indices.at(rFrecuencia).size());
+
+                randPos = indices.at(rFrecuencia).begin() + Randint(0,indices.at(rFrecuencia).size()-1);
                 vTran.setFrecuencia((*randPos)->getFrecuencia());
                 (*randPos)->setUso(true);
                 indices.at(rFrecuencia).erase(randPos);
@@ -133,7 +135,6 @@ void Metaheuristica::aGreedy(){
         }
     }
 
-    unsigned int coste = 0;
 
     for(auto &lista : lInterferencias){
         for(auto &inter : lista){
@@ -143,17 +144,39 @@ void Metaheuristica::aGreedy(){
         }
     }
 
+    pair<vector<transmisor>,bool> sVecina = generarSVecinos(vTransmisores) ;
+    while(sVecina.second){
+        sVecina=generarSVecinos(sVecina.first);
+    }
+
+    cout<<"Solucion final:"<<endl;
+    cout<< coste<<endl;
+
+
+}
+
+//TODO: Usar busqueda binaria en el algoritmo Busqueda Local!
+
+
+void Metaheuristica::grasp(){
+
+}
+
+pair<vector<transmisor>,bool> Metaheuristica::generarSVecinos(vector<transmisor> nVTrans){
+
     unsigned int nCoste;
     int direccion;
+    int iteracion =0;
     bool deboContinuar;
+    unsigned int rFrecuencia;
 
     do {
-        for (auto &vTran : vTransmisores) {
+        for (auto &vTran : nVTrans) {
             if (vTran.getFrecuencia().getFrecuencia().first != -1) {
                 rFrecuencia = vTran.getRangoF();
                 if (!indices.at(rFrecuencia).empty()) {
                     vector<Frecuencia>::iterator currentPos;
-                    rand() % 2 == 1 ? direccion = 1 : direccion = -1;
+                    Randint(0,1) == 1 ? direccion = 1 : direccion = -1;
                     deboContinuar = true;
                     currentPos = vDominios.at(rFrecuencia).begin() + vTran.getFrecuencia().getFrecuencia().second +
                                  direccion;
@@ -183,9 +206,20 @@ void Metaheuristica::aGreedy(){
                     nCoste += inter.getCoste();
             }
         }
-    }while(nCoste>coste);
+        cout<<"prueba"<<endl;
+        cout<<nCoste<<endl;
+        iteracion++;
 
+    }while(nCoste>=coste && iteracion <=10000 );
+    cout<<"Solucion parcial"<<endl;
+    cout<<coste<<endl;
     cout<<nCoste<<endl;
-}
+    if (nCoste <coste){
+        return pair<vector<transmisor>,bool>(nVTrans,true);
+    } else{
+        return pair<vector<transmisor>,bool>(nVTrans,false);
+    }
 
-//TODO: Usar busqueda binaria en el algoritmo Busqueda Local!
+
+
+}

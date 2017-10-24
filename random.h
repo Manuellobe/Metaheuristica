@@ -10,7 +10,7 @@
 #define MASK 2147483647
 #define PRIME 65539
 #define SCALE 0.4656612875e-9
-
+extern int Seed;
 /*******************************************************************/
 /*  Rand genera un numero real pseudoaleatorio entre 0 y 1,        */
 /*  excluyendo el 1.						   */

@@ -3,5 +3,5 @@ project(Metaheuristica)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp Metaheuristica.cpp interferencia.cpp interferencia.h transmisor.cpp transmisor.h Metaheuristica.h frecuencia.h)
+set(SOURCE_FILES main.cpp Metaheuristica.cpp interferencia.cpp interferencia.h transmisor.cpp transmisor.h Metaheuristica.h frecuencia.h random.cpp)
 add_executable(Metaheuristica ${SOURCE_FILES})
