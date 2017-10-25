@@ -118,16 +118,16 @@ void Metaheuristica::cargarDatos(string ruta) {
 
 //endregion
 
-void Metaheuristica::busquedaLocal(){
+void Metaheuristica::busquedaLocal() {
     unsigned int rFrecuencia;
-    coste=0;
-    vector<Frecuencia*>::iterator randPos;
+    coste = 0;
+    vector<Frecuencia *>::iterator randPos;
     for (auto &vTran : vTransmisores) {
-        if(vTran.getFrecuencia().getFrecuencia().first == 0) {
+        if (vTran.getFrecuencia().getFrecuencia().first == 0) {
             rFrecuencia = vTran.getRangoF();
             if (!indices.at(rFrecuencia).empty()) {
 
-                randPos = indices.at(rFrecuencia).begin() + Randint(0,indices.at(rFrecuencia).size()-1);
+                randPos = indices.at(rFrecuencia).begin() + Randint(0, indices.at(rFrecuencia).size() - 1);
                 vTran.setFrecuencia((*randPos)->getFrecuencia());
                 (*randPos)->setUso(true);
                 indices.at(rFrecuencia).erase(randPos);
@@ -136,37 +136,35 @@ void Metaheuristica::busquedaLocal(){
     }
 
 
-    for(auto &lista : lInterferencias){
-        for(auto &inter : lista){
-            if(vTransmisores.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
-                       vTransmisores.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
-                coste+=inter.getCoste();
+    for (auto &lista : lInterferencias) {
+        for (auto &inter : lista) {
+            if (vTransmisores.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                vTransmisores.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
+                coste += inter.getCoste();
         }
     }
 
-    pair<vector<transmisor>,bool> sVecina = generarSVecinos(vTransmisores) ;
-    while(sVecina.second){
-        sVecina=generarSVecinos(sVecina.first);
+    pair<vector<transmisor>, bool> sVecina = generarSVecinos(vTransmisores);
+    while (sVecina.second) {
+        sVecina = generarSVecinos(sVecina.first);
     }
 
-    cout<<"Solucion final:"<<endl;
-    cout<< coste<<endl;
+    cout << "Solucion final:" << endl;
+    cout << coste << endl;
 
 
 }
 
-//TODO: Usar busqueda binaria en el algoritmo Busqueda Local!
 
-
-void Metaheuristica::grasp(){
+void Metaheuristica::grasp() {
 
 }
 
-pair<vector<transmisor>,bool> Metaheuristica::generarSVecinos(vector<transmisor> nVTrans){
+pair<vector<transmisor>, bool> Metaheuristica::generarSVecinos(vector<transmisor> nVTrans) {
 
     unsigned int nCoste;
     int direccion;
-    int iteracion =0;
+    int iteracion = 0;
     bool deboContinuar;
     unsigned int rFrecuencia;
 
@@ -174,25 +172,25 @@ pair<vector<transmisor>,bool> Metaheuristica::generarSVecinos(vector<transmisor>
         for (auto &vTran : nVTrans) {
             if (vTran.getFrecuencia().getFrecuencia().first != -1) {
                 rFrecuencia = vTran.getRangoF();
-                if (!indices.at(rFrecuencia).empty()) {
-                    vector<Frecuencia>::iterator currentPos;
-                    Randint(0,1) == 1 ? direccion = 1 : direccion = -1;
-                    deboContinuar = true;
-                    currentPos = vDominios.at(rFrecuencia).begin() + vTran.getFrecuencia().getFrecuencia().second +
-                                 direccion;
-                    while ((currentPos != vDominios.at(rFrecuencia).begin() - 1 ||
-                            currentPos != vDominios.at(rFrecuencia).end())
-                           && deboContinuar) {
+                vector<Frecuencia>::iterator currentPos;
+                Randint(0, 1) == 1 ? direccion = 1 : direccion = -1;
+                deboContinuar = true;
+                int pos = vTran.getFrecuencia().getFrecuencia().second +
+                          direccion;
+                currentPos = vDominios.at(rFrecuencia).begin() + pos;
 
-                        if (!currentPos->isUsed()) {
-                            currentPos->setUso(true);
-                            vTran.setFrecuencia(*currentPos);
-                            currentPos -= direccion;
-                            currentPos->setUso(false);
-                            deboContinuar = false;
-                        } else
-                            currentPos += direccion;
-                    }
+                while ((currentPos != vDominios.at(rFrecuencia).begin() - 1 &&
+                        currentPos != vDominios.at(rFrecuencia).end())
+                       && deboContinuar) {
+
+                    if (!currentPos->isUsed()) {
+                        currentPos->setUso(true);
+                        vTran.setFrecuencia(*currentPos);
+                        currentPos -= direccion;
+                        currentPos->setUso(false);
+                        deboContinuar = false;
+                    } else
+                        currentPos += direccion;
                 }
             }
         }
@@ -201,25 +199,20 @@ pair<vector<transmisor>,bool> Metaheuristica::generarSVecinos(vector<transmisor>
 
         for (auto &lista : lInterferencias) {
             for (auto &inter : lista) {
-                if (vTransmisores.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
-                    vTransmisores.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
+                if (nVTrans.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                    nVTrans.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
                     nCoste += inter.getCoste();
             }
         }
-        cout<<"prueba"<<endl;
-        cout<<nCoste<<endl;
         iteracion++;
 
-    }while(nCoste>=coste && iteracion <=10000 );
-    cout<<"Solucion parcial"<<endl;
-    cout<<coste<<endl;
-    cout<<nCoste<<endl;
-    if (nCoste <coste){
-        return pair<vector<transmisor>,bool>(nVTrans,true);
-    } else{
-        return pair<vector<transmisor>,bool>(nVTrans,false);
+    } while (nCoste >= coste && iteracion <= 10000);
+    if (nCoste < coste) {
+        coste = nCoste;
+        return pair<vector<transmisor>, bool>(nVTrans, true);
+    } else {
+        return pair<vector<transmisor>, bool>(nVTrans, false);
     }
-
 
 
 }
