@@ -12,6 +12,11 @@ transmisor::transmisor(unsigned int Rango, unsigned int frecuencia):frecuencia(p
     this->rangoF = Rango;
 }
 
+transmisor::transmisor(const transmisor &orig) {
+    this->rangoF = orig.rangoF;
+    this->frecuencia = orig.frecuencia;
+}
+
 int transmisor::getRangoF() const {
     return rangoF;
 }

@@ -20,8 +20,9 @@ class Metaheuristica {
 
 private:
     vector<transmisor> vTransmisores;
+    vector<int> indiceTrans;
     vector<vector<Frecuencia> > vDominios;
-    vector<vector<Frecuencia*>> indices;
+    vector<vector<int>> indiceFrec;
     list<list<interferencia> > lInterferencias;
     unsigned int coste;
 public:

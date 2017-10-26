@@ -13,8 +13,8 @@ int main() {
     //Cargamos los ficheros de cada prueba
     algoritmos.cargarDatos("ejemplo");
 
-
-    algoritmos.busquedaLocal();
+    //algoritmos.busquedaLocal();
+    algoritmos.grasp();
 
     return 0;
 }

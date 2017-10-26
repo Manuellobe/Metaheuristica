@@ -24,6 +24,8 @@ public:
 
     explicit transmisor(unsigned int Rango, unsigned int frecuencia);
 
+    transmisor(const transmisor &orig);
+
     int getRangoF() const;
 
     void setRangoF(unsigned int rangoF);
