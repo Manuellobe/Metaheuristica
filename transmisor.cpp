@@ -25,7 +25,7 @@ void transmisor::setRangoF(unsigned int rangoF) {
     this->rangoF = rangoF;
 }
 
-Frecuencia transmisor::getFrecuencia() const {
+Frecuencia transmisor::getFrecuencia() const{
     return frecuencia;
 }
 

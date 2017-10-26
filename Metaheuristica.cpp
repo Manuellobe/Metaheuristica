@@ -75,7 +75,7 @@ void Metaheuristica::cargarDatos(string ruta) {
                 for (int i = 1; i < tokens.size(); i++) {
                     Frecuencia nFre(pair<int, int>(atoi(tokens[i].c_str()), vDominios.at(pos).size()));
                     vDominios.at(pos).push_back(nFre);
-                    indiceFrec.at(pos).push_back(vDominios.at(pos).size()-1);
+                    indiceFrec.at(pos).push_back(vDominios.at(pos).size() - 1);
                 }
             }
         }
@@ -167,23 +167,22 @@ void Metaheuristica::grasp() {
     vector<vector<Frecuencia>> vFrec = vDominios;
     vector<vector<int>> copiaIndFrec = indiceFrec;
 
-    int k = 1;
+    int k = 50;
     int j = 0;
     int posFrec, rFrecuencia;
     vector<int>::iterator posTrans;
-    while(k>0){
+    while (k > 0) {
 
         posTrans = copiaIndTrans.begin() + Randint(0, copiaIndTrans.size() - 1);
         rFrecuencia = vTrans.at((*posTrans)).getRangoF();
-
         do {
-            posFrec = (Randint(0, vFrec.at(rFrecuencia).size() + j)) % vFrec.at(rFrecuencia).size() - 1;
+            posFrec = (Randint(0, vFrec.at(rFrecuencia).size() + j)) % vFrec.at(rFrecuencia).size();
             j++;
-        }while(vFrec.at(rFrecuencia).at(posFrec).isUsed());
-
-        vTrans.at((*posTrans)).setFrecuencia(vFrec.at(rFrecuencia).at(posFrec));
+        } while (vFrec.at(rFrecuencia).at(posFrec).isUsed());
 
         vFrec.at(rFrecuencia).at(posFrec).setUso(true);
+
+        vTrans.at((*posTrans)).setFrecuencia(vFrec.at(rFrecuencia).at(posFrec));
 
         copiaIndTrans.erase(posTrans);
 
@@ -192,25 +191,45 @@ void Metaheuristica::grasp() {
 
     // Creamos un vector de iteradores para tener un acceso directo a la primera frecuencia disponible de cada rango
     vector<int> vIteradores;
-    for(int i = 0; i < 8; i++){
+    for (int i = 0; i < 8; i++) {
         vIteradores.push_back(0);
     }
 
-    for(auto &trans : vTrans){
-        if (trans.getFrecuencia().getFrecuencia().first == 0){
+    for (auto &trans : vTrans) {
+        if (trans.getFrecuencia().getFrecuencia().first == 0) {
             int rangoF = trans.getRangoF();
             int pos = vIteradores.at(rangoF);
-            while(vFrec.at(rangoF).at(pos).isUsed()){
+            while (pos < vFrec.at(rangoF).size() && vFrec.at(rangoF).at(pos).isUsed()) {
                 vIteradores.at(rangoF)++;
                 pos = vIteradores.at(rangoF);
             }
-            vFrec.at(rangoF).at(pos).setUso(true);
-            trans.setFrecuencia(vFrec.at(rangoF).at(pos));
-            vIteradores.at(rangoF)++;
+            if (pos < vFrec.at(rangoF).size()) {
+                vFrec.at(rangoF).at(pos).setUso(true);
+                trans.setFrecuencia(vFrec.at(rangoF).at(pos));
+                vIteradores.at(rangoF)++;
+            }
+
         }
     }
 
     // Generar tablas costes
+
+    vector<pair<int, int>> vectorCostes;
+
+    for (auto &lista : lInterferencias) {
+        int costeIndividual;
+        int nTrans;
+        for (auto &inter : lista) {
+            costeIndividual = 0;
+            if (vTrans.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                vTrans.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite()) {
+                costeIndividual += inter.getCoste();
+                nTrans = inter.getTrans1();
+            }
+        }
+        pair<int, int> costeActual(costeIndividual, nTrans);
+        vectorCostes.push_back(costeActual);
+    }
 
     // Obtener solucion
 
