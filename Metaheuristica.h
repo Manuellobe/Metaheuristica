@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iterator>
 #include <stdlib.h>
+#include <algorithm>
 
 class Metaheuristica {
 
@@ -30,7 +31,8 @@ public:
     void cargarDatos(string ruta);
     void busquedaLocal();
     void grasp();
-    pair<vector<transmisor>,bool> generarSVecinos(vector<transmisor> nVTrans);
+    pair<vector<transmisor>,bool> generarSVecinos(vector<transmisor> nVTrans, vector<vector<Frecuencia>> nVDom, unsigned int iteraciones);
+    //bool funcionComparacion(const pair<int, int> &primero, const pair<int, int> &segundo) { return primero.first < segundo.first; }
 
 };
 

@@ -121,6 +121,7 @@ void Metaheuristica::cargarDatos(string ruta) {
 
 void Metaheuristica::busquedaLocal() {
     unsigned int rFrecuencia;
+    vector<vector<Frecuencia>> nFrec = vDominios;
     coste = 0;
     vector<int>::iterator randPos;
     for (auto &vTran : vTransmisores) {
@@ -146,9 +147,9 @@ void Metaheuristica::busquedaLocal() {
         }
     }
 
-    pair<vector<transmisor>, bool> sVecina = generarSVecinos(vTransmisores);
+    pair<vector<transmisor>, bool> sVecina = generarSVecinos(vTransmisores, nFrec, 1000);
     while (sVecina.second) {
-        sVecina = generarSVecinos(sVecina.first);
+        sVecina = generarSVecinos(sVecina.first, nFrec, 1000);
     }
 
     cout << "Solucion final:" << endl;
@@ -160,86 +161,214 @@ void Metaheuristica::busquedaLocal() {
 
 void Metaheuristica::grasp() {
 
-    // Crear LRC
+    vector<transmisor> mejorSolucion;
+    int mejorCoste = 9999;
 
-    vector<transmisor> vTrans = vTransmisores;
-    vector<int> copiaIndTrans = indiceTrans;
-    vector<vector<Frecuencia>> vFrec = vDominios;
-    vector<vector<int>> copiaIndFrec = indiceFrec;
+    for(int i = 0; i < 25; i++) {
 
-    int k = 50;
-    int j = 0;
-    int posFrec, rFrecuencia;
-    vector<int>::iterator posTrans;
-    while (k > 0) {
+        // Coste por defecto
+        coste = 9999;
 
-        posTrans = copiaIndTrans.begin() + Randint(0, copiaIndTrans.size() - 1);
-        rFrecuencia = vTrans.at((*posTrans)).getRangoF();
-        do {
-            posFrec = (Randint(0, vFrec.at(rFrecuencia).size() + j)) % vFrec.at(rFrecuencia).size();
-            j++;
-        } while (vFrec.at(rFrecuencia).at(posFrec).isUsed());
+        vector<transmisor> vTrans = vTransmisores;
+        vector<int> copiaIndTrans = indiceTrans;
+        vector<vector<Frecuencia>> vFrec = vDominios;
+        vector<vector<int>> copiaIndFrec = indiceFrec;
 
-        vFrec.at(rFrecuencia).at(posFrec).setUso(true);
+        vector<transmisor> solucionActual = vTrans;
 
-        vTrans.at((*posTrans)).setFrecuencia(vFrec.at(rFrecuencia).at(posFrec));
+        int k = 10;
+        int j = 0;
+        int posFrec, rFrecuencia;
+        vector<int>::iterator posTrans;
 
-        copiaIndTrans.erase(posTrans);
+        // Crear LRC
 
-        k--;
-    }
+        while (k > 0) {
 
-    // Creamos un vector de iteradores para tener un acceso directo a la primera frecuencia disponible de cada rango
-    vector<int> vIteradores;
-    for (int i = 0; i < 8; i++) {
-        vIteradores.push_back(0);
-    }
+            posTrans = copiaIndTrans.begin() + Randint(0, copiaIndTrans.size() - 1);
+            rFrecuencia = vTrans.at((*posTrans)).getRangoF();
+            do {
+                posFrec = (Randint(0, vFrec.at(rFrecuencia).size() + j)) % vFrec.at(rFrecuencia).size();
+                j++;
+            } while (vFrec.at(rFrecuencia).at(posFrec).isUsed());
 
-    for (auto &trans : vTrans) {
-        if (trans.getFrecuencia().getFrecuencia().first == 0) {
-            int rangoF = trans.getRangoF();
-            int pos = vIteradores.at(rangoF);
-            while (pos < vFrec.at(rangoF).size() && vFrec.at(rangoF).at(pos).isUsed()) {
-                vIteradores.at(rangoF)++;
-                pos = vIteradores.at(rangoF);
-            }
-            if (pos < vFrec.at(rangoF).size()) {
-                vFrec.at(rangoF).at(pos).setUso(true);
-                trans.setFrecuencia(vFrec.at(rangoF).at(pos));
-                vIteradores.at(rangoF)++;
-            }
+            vFrec.at(rFrecuencia).at(posFrec).setUso(true);
 
+            vTrans.at((*posTrans)).setFrecuencia(vFrec.at(rFrecuencia).at(posFrec));
+
+            copiaIndTrans.erase(posTrans);
+
+            k--;
         }
-    }
 
-    // Generar tablas costes
+        // Restablecemos k para futuros calculos
+        k = 10;
 
-    vector<pair<int, int>> vectorCostes;
+        // Creamos un vector de iteradores para tener un acceso directo a la primera frecuencia disponible de cada rango
+        vector<int> vIteradores;
+        for (int i = 0; i < 8; i++) {
+            vIteradores.push_back(0);
+        }
 
-    for (auto &lista : lInterferencias) {
-        int costeIndividual;
-        int nTrans;
-        for (auto &inter : lista) {
-            costeIndividual = 0;
-            if (vTrans.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
-                vTrans.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite()) {
-                costeIndividual += inter.getCoste();
-                nTrans = inter.getTrans1();
+        for (auto &trans : vTrans) {
+            if (trans.getFrecuencia().getFrecuencia().first == 0) {
+                int rangoF = trans.getRangoF();
+                int pos = vIteradores.at(rangoF);
+                while (pos < vFrec.at(rangoF).size() && vFrec.at(rangoF).at(pos).isUsed()) {
+                    vIteradores.at(rangoF)++;
+                    pos = vIteradores.at(rangoF);
+                }
+                if (pos < vFrec.at(rangoF).size()) {
+                    vFrec.at(rangoF).at(pos).setUso(true);
+                    trans.setFrecuencia(vFrec.at(rangoF).at(pos));
+                    vIteradores.at(rangoF)++;
+                }
+
             }
         }
-        pair<int, int> costeActual(costeIndividual, nTrans);
-        vectorCostes.push_back(costeActual);
+
+        // Generar tablas costes
+
+        vector<pair<int, int>> vectorCostes;
+
+        for (auto &lista : lInterferencias) {
+            int costeIndividual;
+            int nTrans;
+            for (auto &inter : lista) {
+                costeIndividual = 0;
+                if (vTrans.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                    vTrans.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite()) {
+                    costeIndividual += inter.getCoste();
+                    nTrans = inter.getTrans1();
+                }
+            }
+            pair<int, int> costeActual(costeIndividual, nTrans);
+            vectorCostes.push_back(costeActual);
+        }
+
+        //Ordenar vectorCostes
+
+        sort(vectorCostes.begin(), vectorCostes.end());
+
+        vector<float> calculoPorPosicion;
+
+        float sucesionArmonica = 0.0f;
+
+        for (int i = 0; i <= vectorCostes.size(); i++) {
+            sucesionArmonica += 1.0f / (i + 1);
+            calculoPorPosicion.push_back(sucesionArmonica);
+        }
+
+        // Obtener solucion    pos/(total-1)
+
+        double valorAleatorio;
+        int posValorExtraido;
+        int min, max;
+        vector<pair<int, int>>::iterator vectorCostesIt;
+
+        while (vectorCostes.size() != k) {
+            valorAleatorio = Rand();
+            posValorExtraido = -1;
+            min = 0;
+            max = vectorCostes.size() - 1;
+            while (posValorExtraido == -1) {
+
+                //Calculo posicion intermedia
+                int posIntermedia = round((max - min) / 2.0) + min;
+                float valorArmonico = calculoPorPosicion[vectorCostes.size() - 1];
+
+
+                //Comprobacion del valor de las posiciones con el valor deseado
+                if ((1 / (float) posIntermedia) / valorArmonico > valorAleatorio) {
+
+                    if ((1 / (float) posIntermedia + 1) / valorArmonico < valorAleatorio) {
+                        //Comprobar entre el valor actual y el anterior cual es el mas cercano a valorAleatorio
+                        float valorPosActual, valorPosPrevia;
+                        valorPosActual = (1 / (float) posIntermedia + 1) / valorArmonico;
+                        valorPosPrevia = (1 / (float) posIntermedia) / valorArmonico;
+                        if (valorAleatorio - valorPosPrevia >= valorPosActual - valorAleatorio)
+                            posValorExtraido = posIntermedia - 1;
+                        else
+                            posValorExtraido = posIntermedia;
+                    } else {
+                        if (max - min <= 1)
+                            posValorExtraido = max;
+                        else
+                            //Volver a empezar con un nuevo min y max
+                            min = posIntermedia;
+                    }
+                } else {
+                    if (max - min <= 1)
+                        posValorExtraido = min;
+                    else {
+                        //Volver a empezar con un nuevo min y max
+                        if (vectorCostes.size() % 2 == 0)
+                            max = posIntermedia - 1;
+                        else
+                            max = posIntermedia;
+                    }
+                }
+            }
+
+            solucionActual.at(vectorCostes.at(posValorExtraido).second) = vTrans.at(
+                    vectorCostes.at(posValorExtraido).second);
+            vectorCostesIt = vectorCostes.begin() + posValorExtraido;
+            vectorCostes.erase(vectorCostesIt);
+            //cout << posValorExtraido << endl;
+        }
+
+        // Asignamos los k transmisores restantes segun el algoritmo greedy
+
+        while (vectorCostes.size() != 0) {
+
+            // Obtengo la mejor frecuencia disponible que coincide con la primera posicion del indice
+            unsigned int rangoF = vTrans.at(vectorCostes[0].second).getRangoF();
+
+            auto itInicio = copiaIndFrec.at(vTrans.at(vectorCostes[0].second).getRangoF()).begin();
+            while (!copiaIndFrec.at(rangoF).empty() && vFrec.at(rangoF).at((*itInicio)).isUsed()) {
+                copiaIndFrec.at(rangoF).erase(itInicio);
+                if (!copiaIndFrec.at(rangoF).empty())
+                    itInicio = copiaIndFrec.at(vTrans.at(vectorCostes[0].second).getRangoF()).begin();
+            }
+
+            if (!copiaIndFrec.at(rangoF).empty()) {
+                unsigned int posFrec = (*itInicio);
+
+                // Asigno la frecuencia al primer transmisor del vector de costes
+                solucionActual.at(vectorCostes[0].second).setFrecuencia(vFrec.at(rangoF).at(posFrec));
+
+                // Quito lo frecuencia asignada del indice
+                copiaIndFrec.at(rangoF).erase(copiaIndFrec.at(rangoF).begin());
+            }
+
+            // Quito el transmisor del vector de costes
+            vectorCostes.erase(vectorCostes.begin());
+        }
+
+
+        pair<vector<transmisor>, bool> sVecina = generarSVecinos(solucionActual, vFrec, 400);
+        while (sVecina.second) {
+            sVecina = generarSVecinos(sVecina.first, vFrec, 400);
+        }
+
+        cout << "Solucion parcial:" << endl;
+        cout << coste << endl;
+
+        if(coste < mejorCoste){
+            mejorCoste = coste;
+            mejorSolucion = sVecina.first;
+        }
+
     }
 
-    // Obtener solucion
-
-    // Repetir :D
-
-
+    cout << "Solucion final:" << endl;
+    cout << mejorCoste << endl;
 
 }
 
-pair<vector<transmisor>, bool> Metaheuristica::generarSVecinos(vector<transmisor> nVTrans) {
+pair<vector<transmisor>, bool>
+Metaheuristica::generarSVecinos(vector<transmisor> nVTrans, vector<vector<Frecuencia>> nVDom,
+                                unsigned int iteraciones) {
 
     unsigned int nCoste;
     int direccion;
@@ -256,10 +385,10 @@ pair<vector<transmisor>, bool> Metaheuristica::generarSVecinos(vector<transmisor
                 deboContinuar = true;
                 int pos = vTran.getFrecuencia().getFrecuencia().second +
                           direccion;
-                currentPos = vDominios.at(rFrecuencia).begin() + pos;
+                currentPos = nVDom.at(rFrecuencia).begin() + pos;
 
-                while ((currentPos != vDominios.at(rFrecuencia).begin() - 1 &&
-                        currentPos != vDominios.at(rFrecuencia).end())
+                while ((currentPos != nVDom.at(rFrecuencia).begin() - 1 &&
+                        currentPos != nVDom.at(rFrecuencia).end())
                        && deboContinuar) {
 
                     if (!currentPos->isUsed()) {
@@ -285,7 +414,7 @@ pair<vector<transmisor>, bool> Metaheuristica::generarSVecinos(vector<transmisor
         }
         iteracion++;
 
-    } while (nCoste >= coste && iteracion <= 10000);
+    } while (nCoste >= iteraciones && iteracion <= iteraciones);
     if (nCoste < coste) {
         coste = nCoste;
         return pair<vector<transmisor>, bool>(nVTrans, true);
