@@ -157,7 +157,7 @@ void Metaheuristica::greedy(){
 
     timePassed = clock();
 
-    cout<<(timePassed - startTime)/ (double) CLOCKS_PER_SEC<<endl;
+    cout<<"Tiempo (Segundos): "<<(timePassed - startTime)/ (double) CLOCKS_PER_SEC<<endl;
 
     cout << "Solucion final Greedy:" << endl;
     cout << coste << endl;
@@ -171,6 +171,11 @@ void Metaheuristica::busquedaLocal() {
     vector<vector<int>> copiaIndiceFrec = indiceFrec;
     coste = 0;
     vector<int>::iterator randPos;
+
+    startTime = clock();
+
+    // Greedy aleatorizado
+
     for (auto &vTran : nTrans) {
         if (vTran.getFrecuencia().getFrecuencia().first == 0) {
             rFrecuencia = vTran.getRangoF();
@@ -194,10 +199,16 @@ void Metaheuristica::busquedaLocal() {
         }
     }
 
+    // Fin greedy
+
     pair<vector<transmisor>, bool> sVecina = generarSVecinos(nTrans, nFrec, 1000);
     while (sVecina.second) {
         sVecina = generarSVecinos(sVecina.first, nFrec, 1000);
     }
+
+    timePassed = clock();
+
+    cout<<"Tiempo (Segundos): "<<(timePassed - startTime)/ (double) CLOCKS_PER_SEC<<endl;
 
     cout << "Solucion final BL:" << endl;
     cout << coste << endl;
@@ -210,6 +221,8 @@ void Metaheuristica::grasp() {
 
     vector<transmisor> mejorSolucion;
     int mejorCoste = 9999;
+
+    startTime = clock();
 
     for(int i = 0; i < 25; i++) {
 
@@ -257,6 +270,8 @@ void Metaheuristica::grasp() {
             vIteradores.push_back(0);
         }
 
+        // Asignamos frecuencias a todos los transmisores mediante greedy
+
         for (auto &trans : vTrans) {
             if (trans.getFrecuencia().getFrecuencia().first == 0) {
                 int rangoF = trans.getRangoF();
@@ -299,6 +314,7 @@ void Metaheuristica::grasp() {
 
         vector<float> calculoPorPosicion;
 
+        // La suma 1/1 + 1/2 + 1/3 + ... + 1/n es denominada sucesion armonica
         float sucesionArmonica = 0.0f;
 
         for (int i = 0; i <= vectorCostes.size(); i++) {
@@ -306,7 +322,7 @@ void Metaheuristica::grasp() {
             calculoPorPosicion.push_back(sucesionArmonica);
         }
 
-        // Obtener solucion    pos/(total-1)
+        // Obtener solucion
 
         double valorAleatorio;
         int posValorExtraido;
@@ -403,6 +419,10 @@ void Metaheuristica::grasp() {
         }
 
     }
+
+    timePassed = clock();
+
+    cout<<"Tiempo (Segundos): "<<(timePassed - startTime)/ (double) CLOCKS_PER_SEC<<endl;
 
     cout << "Solucion final GRASP:" << endl;
     cout << mejorCoste << endl;

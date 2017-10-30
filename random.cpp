@@ -5,4 +5,4 @@
 #include "random.h"
 
 
-int Seed = 77383310;
+int Seed = 33107738;
