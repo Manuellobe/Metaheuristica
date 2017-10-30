@@ -29,10 +29,10 @@ private:
 public:
     Metaheuristica();
     void cargarDatos(string ruta);
+    void greedy();
     void busquedaLocal();
     void grasp();
     pair<vector<transmisor>,bool> generarSVecinos(vector<transmisor> nVTrans, vector<vector<Frecuencia>> nVDom, unsigned int iteraciones);
-    //bool funcionComparacion(const pair<int, int> &primero, const pair<int, int> &segundo) { return primero.first < segundo.first; }
 
 };
 

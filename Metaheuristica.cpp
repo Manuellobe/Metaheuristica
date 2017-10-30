@@ -119,21 +119,23 @@ void Metaheuristica::cargarDatos(string ruta) {
 
 //endregion
 
-void Metaheuristica::busquedaLocal() {
+void Metaheuristica::greedy(){
     unsigned int rFrecuencia;
     vector<vector<Frecuencia>> nFrec = vDominios;
+    vector<transmisor> nTrans = vTransmisores;
+    vector<vector<int>> copiaIndiceFrec = indiceFrec;
     coste = 0;
     vector<int>::iterator randPos;
-    for (auto &vTran : vTransmisores) {
+    for (auto &vTran : nTrans) {
         if (vTran.getFrecuencia().getFrecuencia().first == 0) {
             rFrecuencia = vTran.getRangoF();
-            if (!indiceFrec.at(rFrecuencia).empty()) {
+            if (!copiaIndiceFrec.at(rFrecuencia).empty()) {
 
-                randPos = indiceFrec.at(rFrecuencia).begin() + Randint(0, indiceFrec.at(rFrecuencia).size() - 1);
+                randPos = copiaIndiceFrec.at(rFrecuencia).begin() + Randint(0, copiaIndiceFrec.at(rFrecuencia).size() - 1);
 
-                vTran.setFrecuencia(vDominios.at(rFrecuencia).at((*randPos)).getFrecuencia());
-                vDominios.at(rFrecuencia).at((*randPos)).setUso(true);
-                indiceFrec.at(rFrecuencia).erase(randPos);
+                vTran.setFrecuencia(nFrec.at(rFrecuencia).at((*randPos)).getFrecuencia());
+                nFrec.at(rFrecuencia).at((*randPos)).setUso(true);
+                copiaIndiceFrec.at(rFrecuencia).erase(randPos);
             }
         }
     }
@@ -141,18 +143,53 @@ void Metaheuristica::busquedaLocal() {
 
     for (auto &lista : lInterferencias) {
         for (auto &inter : lista) {
-            if (vTransmisores.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
-                vTransmisores.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
+            if (nTrans.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                nTrans.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
                 coste += inter.getCoste();
         }
     }
 
-    pair<vector<transmisor>, bool> sVecina = generarSVecinos(vTransmisores, nFrec, 1000);
+    cout << "Solucion final Greedy:" << endl;
+    cout << coste << endl;
+}
+
+
+void Metaheuristica::busquedaLocal() {
+    unsigned int rFrecuencia;
+    vector<vector<Frecuencia>> nFrec = vDominios;
+    vector<transmisor> nTrans = vTransmisores;
+    vector<vector<int>> copiaIndiceFrec = indiceFrec;
+    coste = 0;
+    vector<int>::iterator randPos;
+    for (auto &vTran : nTrans) {
+        if (vTran.getFrecuencia().getFrecuencia().first == 0) {
+            rFrecuencia = vTran.getRangoF();
+            if (!copiaIndiceFrec.at(rFrecuencia).empty()) {
+
+                randPos = copiaIndiceFrec.at(rFrecuencia).begin() + Randint(0, copiaIndiceFrec.at(rFrecuencia).size() - 1);
+
+                vTran.setFrecuencia(nFrec.at(rFrecuencia).at((*randPos)).getFrecuencia());
+                nFrec.at(rFrecuencia).at((*randPos)).setUso(true);
+                copiaIndiceFrec.at(rFrecuencia).erase(randPos);
+            }
+        }
+    }
+
+
+    for (auto &lista : lInterferencias) {
+        for (auto &inter : lista) {
+            if (nTrans.at(inter.getTrans1()).getFrecuencia().getFrecuencia().first +
+                        nTrans.at(inter.getTrans2()).getFrecuencia().getFrecuencia().first > inter.getLimite())
+                coste += inter.getCoste();
+        }
+    }
+
+    pair<vector<transmisor>, bool> sVecina = generarSVecinos(nTrans, nFrec, 1000);
     while (sVecina.second) {
         sVecina = generarSVecinos(sVecina.first, nFrec, 1000);
     }
 
-    cout << "Solucion final:" << endl;
+    cout << "Solucion final BL:" << endl;
     cout << coste << endl;
 
 
@@ -314,7 +351,6 @@ void Metaheuristica::grasp() {
                     vectorCostes.at(posValorExtraido).second);
             vectorCostesIt = vectorCostes.begin() + posValorExtraido;
             vectorCostes.erase(vectorCostesIt);
-            //cout << posValorExtraido << endl;
         }
 
         // Asignamos los k transmisores restantes segun el algoritmo greedy
@@ -351,9 +387,6 @@ void Metaheuristica::grasp() {
             sVecina = generarSVecinos(sVecina.first, vFrec, 400);
         }
 
-        cout << "Solucion parcial:" << endl;
-        cout << coste << endl;
-
         if(coste < mejorCoste){
             mejorCoste = coste;
             mejorSolucion = sVecina.first;
@@ -361,7 +394,7 @@ void Metaheuristica::grasp() {
 
     }
 
-    cout << "Solucion final:" << endl;
+    cout << "Solucion final GRASP:" << endl;
     cout << mejorCoste << endl;
 
 }
