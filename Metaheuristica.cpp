@@ -120,12 +120,18 @@ void Metaheuristica::cargarDatos(string ruta) {
 //endregion
 
 void Metaheuristica::greedy(){
+
     unsigned int rFrecuencia;
+
     vector<vector<Frecuencia>> nFrec = vDominios;
     vector<transmisor> nTrans = vTransmisores;
     vector<vector<int>> copiaIndiceFrec = indiceFrec;
+
     coste = 0;
     vector<int>::iterator randPos;
+
+    startTime = clock();
+
     for (auto &vTran : nTrans) {
         if (vTran.getFrecuencia().getFrecuencia().first == 0) {
             rFrecuencia = vTran.getRangoF();
@@ -148,6 +154,10 @@ void Metaheuristica::greedy(){
                 coste += inter.getCoste();
         }
     }
+
+    timePassed = clock();
+
+    cout<<(timePassed - startTime)/ (double) CLOCKS_PER_SEC<<endl;
 
     cout << "Solucion final Greedy:" << endl;
     cout << coste << endl;

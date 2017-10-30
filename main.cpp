@@ -14,8 +14,8 @@ int main() {
     algoritmos.cargarDatos("graph05");
 
     algoritmos.greedy();
-    algoritmos.grasp();
-    algoritmos.busquedaLocal();
+    //algoritmos.grasp();
+    //algoritmos.busquedaLocal();
 
     return 0;
 }

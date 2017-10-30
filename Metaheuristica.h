@@ -16,6 +16,7 @@
 #include <iterator>
 #include <stdlib.h>
 #include <algorithm>
+#include <time.h>
 
 class Metaheuristica {
 
@@ -26,6 +27,10 @@ private:
     vector<vector<int>> indiceFrec;
     list<list<interferencia> > lInterferencias;
     unsigned int coste;
+
+    clock_t startTime;
+    clock_t timePassed;
+
 public:
     Metaheuristica();
     void cargarDatos(string ruta);
